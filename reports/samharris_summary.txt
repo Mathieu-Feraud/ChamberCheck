@@ -1,0 +1,35 @@
+================================================================================
+ECHO CHAMBER ANALYSIS SUMMARY - r/samharris
+================================================================================
+
+Argument Narrowness:
+  Reported: 81/100 (81.0%)
+  Mean: 6.19
+  Median: 5.00
+  Std Dev: 1.91
+  Range: 5.0 - 10.0
+
+Hostility:
+  Reported: 100/100 (100.0%)
+  Mean: 2.83
+  Median: 1.50
+  Std Dev: 3.02
+  Range: 0.0 - 10.0
+
+Suppression:
+  Reported: 81/100 (81.0%)
+  Mean: 5.00
+  Median: 5.00
+  Std Dev: 2.05
+  Range: 0.0 - 10.0
+
+Epistemic Closure:
+  Reported: 81/100 (81.0%)
+  Mean: 5.31
+  Median: 5.00
+  Std Dev: 1.91
+  Range: 0.0 - 10.0
+
+Argument Avoidance:
+  Reported: 0/100 (0.0%)
+  No valid scores

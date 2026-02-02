@@ -1,0 +1,38 @@
+================================================================================
+ECHO CHAMBER ANALYSIS SUMMARY - r/DecodingTheGurus
+================================================================================
+
+Argument Narrowness:
+  Reported: 86/100 (86.0%)
+  Mean: 6.90
+  Median: 5.00
+  Std Dev: 2.51
+  Range: 0.0 - 10.0
+
+Hostility:
+  Reported: 98/100 (98.0%)
+  Mean: 4.32
+  Median: 5.00
+  Std Dev: 3.13
+  Range: 0.0 - 10.0
+
+Suppression:
+  Reported: 85/100 (85.0%)
+  Mean: 5.54
+  Median: 5.00
+  Std Dev: 2.07
+  Range: 0.0 - 10.0
+
+Epistemic Closure:
+  Reported: 85/100 (85.0%)
+  Mean: 5.51
+  Median: 5.00
+  Std Dev: 2.20
+  Range: 0.0 - 10.0
+
+Argument Avoidance:
+  Reported: 1/100 (1.0%)
+  Mean: 0.00
+  Median: 0.00
+  Std Dev: 0.00
+  Range: 0.0 - 0.0

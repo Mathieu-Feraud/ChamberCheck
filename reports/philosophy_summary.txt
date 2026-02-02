@@ -1,0 +1,38 @@
+================================================================================
+ECHO CHAMBER ANALYSIS SUMMARY - r/philosophy
+================================================================================
+
+Argument Narrowness:
+  Reported: 79/100 (79.0%)
+  Mean: 5.04
+  Median: 5.00
+  Std Dev: 1.17
+  Range: 0.0 - 10.0
+
+Hostility:
+  Reported: 100/100 (100.0%)
+  Mean: 0.35
+  Median: 0.00
+  Std Dev: 1.28
+  Range: 0.0 - 5.0
+
+Suppression:
+  Reported: 79/100 (79.0%)
+  Mean: 2.54
+  Median: 0.00
+  Std Dev: 2.64
+  Range: 0.0 - 10.0
+
+Epistemic Closure:
+  Reported: 79/100 (79.0%)
+  Mean: 3.13
+  Median: 5.00
+  Std Dev: 2.58
+  Range: 0.0 - 10.0
+
+Argument Avoidance:
+  Reported: 2/100 (2.0%)
+  Mean: 0.00
+  Median: 0.00
+  Std Dev: 0.00
+  Range: 0.0 - 0.0

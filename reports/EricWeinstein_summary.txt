@@ -1,0 +1,38 @@
+================================================================================
+ECHO CHAMBER ANALYSIS SUMMARY - r/EricWeinstein
+================================================================================
+
+Argument Narrowness:
+  Reported: 64/100 (64.0%)
+  Mean: 5.25
+  Median: 5.00
+  Std Dev: 1.60
+  Range: 0.0 - 10.0
+
+Hostility:
+  Reported: 99/100 (99.0%)
+  Mean: 0.93
+  Median: 0.00
+  Std Dev: 2.11
+  Range: 0.0 - 8.0
+
+Suppression:
+  Reported: 64/100 (64.0%)
+  Mean: 3.72
+  Median: 5.00
+  Std Dev: 2.72
+  Range: 0.0 - 10.0
+
+Epistemic Closure:
+  Reported: 64/100 (64.0%)
+  Mean: 3.88
+  Median: 5.00
+  Std Dev: 2.63
+  Range: 0.0 - 10.0
+
+Argument Avoidance:
+  Reported: 3/100 (3.0%)
+  Mean: 0.00
+  Median: 0.00
+  Std Dev: 0.00
+  Range: 0.0 - 0.0

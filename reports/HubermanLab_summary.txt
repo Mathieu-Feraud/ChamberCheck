@@ -1,0 +1,35 @@
+================================================================================
+ECHO CHAMBER ANALYSIS SUMMARY - r/HubermanLab
+================================================================================
+
+Argument Narrowness:
+  Reported: 55/100 (55.0%)
+  Mean: 5.40
+  Median: 5.00
+  Std Dev: 1.79
+  Range: 0.0 - 10.0
+
+Hostility:
+  Reported: 100/100 (100.0%)
+  Mean: 1.20
+  Median: 0.00
+  Std Dev: 2.22
+  Range: 0.0 - 8.0
+
+Suppression:
+  Reported: 55/100 (55.0%)
+  Mean: 4.02
+  Median: 5.00
+  Std Dev: 2.55
+  Range: 0.0 - 10.0
+
+Epistemic Closure:
+  Reported: 55/100 (55.0%)
+  Mean: 4.31
+  Median: 5.00
+  Std Dev: 2.54
+  Range: 0.0 - 10.0
+
+Argument Avoidance:
+  Reported: 0/100 (0.0%)
+  No valid scores
