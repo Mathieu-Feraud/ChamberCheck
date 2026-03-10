@@ -74,7 +74,7 @@ Repository = "https://github.com/yourusername/ChamberCheck"
 Documentation = "https://github.com/yourusername/ChamberCheck/blob/main/README.md"
 
 [project.scripts]
-chambercheck = "chambercheck.cli:main"
+chambercheck = "ChamberCheck.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

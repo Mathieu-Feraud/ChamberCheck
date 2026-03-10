@@ -17,21 +17,34 @@ ChamberCheck quantifies discourse patterns in online communities (Reddit, Facebo
 ```
 ChamberCheck/
 ├── src/
-│   └── chambercheck/
-│       ├── scrapers/          # Platform-specific scrapers
-│       ├── preprocessing/     # Text cleaning and parsing
-│       ├── analysis/          # Topic modeling and sentiment analysis
-│       ├── scoring/           # Metric computation
-│       ├── models/            # Data models
-│       └── utils/             # Utilities and helpers
+│   └── ChamberCheck/
+│       ├── scrapers/                # Platform-specific data collection
+│       ├── analysis/                # LLM-powered discourse analysis
+│       ├── preprocessing/           # Data cleaning and filtering
+│       ├── CC_derived_metrics/      # Echo chamber metrics computation
+│       ├── model_analysis/          # A/B/n testing framework
+│       ├── reporting/               # Report generation
+│       ├── models/                  # Data models (Post, Comment, etc.)
+│       ├── scoring/                 # Metric aggregation
+│       ├── utils/                   # Utilities and logging
+│       ├── config.py                # Configuration management
+│       └── constants.py             # Project-wide constants
+├── config/                          # YAML configuration files
+│   ├── config.yaml                  # Production config
+│   ├── config.test.yaml             # Test/dev config
+│   └── config.intellectual.yaml     # Custom config template
 ├── data/
-│   ├── raw/                   # Raw scraped data
-│   ├── processed/             # Cleaned and processed data
-│   └── output/                # Analysis results
-├── notebooks/                 # Jupyter notebooks for exploration
-├── tests/                     # Unit tests
-├── requirements.txt           # Python dependencies
-└── README.md                  # This file
+│   ├── raw/                         # Raw scraped data
+│   ├── processed/                   # Cleaned data
+│   └── output/                      # Analysis results and plots
+├── test_scripts/                    # Pipeline execution scripts
+│   ├── workflow.py                  # Full 8-stage pipeline runner
+│   ├── run_*.py                     # Individual stage executors
+│   └── ad-hoc/                      # Exploratory and diagnostic scripts
+├── tests/                           # Unit and integration tests
+├── pyproject.toml                   # Package metadata and dependencies
+├── ARCHITECTURE_RULES.md            # Coding guidelines
+└── README.md                        # This file
 ```
 
 ## Installation
@@ -69,85 +82,183 @@ pip install -e .
 pip install -e ".[dev]"
 ```
 
-4. Configure credentials:
+4. **Configure API credentials:**
 
-Create a `.env` file in the project root:
+**⚠️ IMPORTANT: Never commit API keys to git. Use environment variables or local config files.**
+
+#### Option A: Environment Variables (Recommended)
+
+Set environment variables before running ChamberCheck:
+
+```powershell
+# Windows PowerShell
+$env:REDDIT_CLIENT_ID = "your_reddit_client_id"
+$env:REDDIT_CLIENT_SECRET = "your_reddit_client_secret"
+$env:REDDIT_USER_AGENT = "ChamberCheck/0.1"
+$env:OPENAI_API_KEY = "your_openai_api_key"
+$env:ANTHROPIC_API_KEY = "your_anthropic_api_key"
+```
+
+```bash
+# Linux/Mac
+export REDDIT_CLIENT_ID="your_reddit_client_id"
+export REDDIT_CLIENT_SECRET="your_reddit_client_secret"
+export REDDIT_USER_AGENT="ChamberCheck/0.1"
+export OPENAI_API_KEY="your_openai_api_key"
+export ANTHROPIC_API_KEY="your_anthropic_api_key"
+```
+
+#### Option B: Local `.env` File (Development Only)
+
+Create a `.env` file in the project root (already `.gitignore`d):
+
 ```env
-# Reddit API
-REDDIT_CLIENT_ID=your_client_id
-REDDIT_CLIENT_SECRET=your_client_secret
+REDDIT_CLIENT_ID=your_reddit_client_id
+REDDIT_CLIENT_SECRET=your_reddit_client_secret
 REDDIT_USER_AGENT=ChamberCheck/0.1
-
-# LLM API (optional)
-LLM_PROVIDER=openai
-LLM_API_KEY=your_api_key
-LLM_MODEL=gpt-4
+OPENAI_API_KEY=your_openai_api_key
+ANTHROPIC_API_KEY=your_anthropic_api_key
 ```
 
-Or create a `config.json` file:
-```json
-{
-  "reddit": {
-    "client_id": "your_client_id",
-    "client_secret": "your_client_secret",
-    "user_agent": "ChamberCheck/0.1"
-  },
-  "llm": {
-    "provider": "openai",
-    "api_key": "your_api_key",
-    "model": "gpt-4"
-  }
-}
+#### Option C: User-Level Config (Reusable Across Projects)
+
+Create `~/.chambercheck/config.yaml`:
+
+```yaml
+reddit:
+  client_id: your_reddit_client_id
+  client_secret: your_reddit_client_secret
+  user_agent: ChamberCheck/0.1
+post_analysis:
+  provider: openai  # or anthropic
+  model: gpt-4o    # or claude-3-5-sonnet-20241022
+comment_analysis:
+  provider: anthropic
+  model: claude-haiku-4-5-20251001
 ```
 
-## Usage
+**Note:** Config files and environment variables are never committed. The `.env` file in the project root is ignored by git.
 
-### Basic Example: Scraping Reddit
+## Usage: The 8-Stage Pipeline
+
+ChamberCheck implements a modular 8-stage pipeline for analyzing discourse:
+
+### Overview
+
+| Stage | Name | Input | Output | Module |
+|-------|------|-------|--------|--------|
+| 1 | **Scrape Posts** | Subreddit config | `posts.json` | `scrapers.batch_scrape_posts_only()` |
+| 2 | **Analyse Post Titles** | Posts | `analysis_NNN.json` | `analysis.analyze_posts()` |
+| 3 | **Preprocess Posts** | Posts + Analysis | `pre_process_NNN.json` | `preprocessing.preprocess_posts()` |
+| 4 | **Scrape Comments** | Filtered posts | `comments_*.json` | `scrapers.scrape_comments()` |
+| 5 | **Preprocess Comments** | Comments | `comments_filtered_*.json` | `preprocessing.preprocess_comments()` |
+| 6 | **Analyse Comments** | Filtered comments | `comment_analysis_*.json` | `analysis.run_comment_analysis()` |
+| 7 | **Compute Metrics** | Analyzed comments | `v3_metrics_*.json` | `CC_derived_metrics.V3Metrics` |
+| 8 | **Visualize** | Metrics | PNG plots | Ad-hoc plotting scripts |
+
+### Running the Full Pipeline
+
+The simplest way to run all 8 stages:
+
+```bash
+python test_scripts/workflow.py
+```
+
+Edit `test_scripts/workflow.py` to configure:
+- `CONFIG` — path to YAML config file (default: `config/config.test.yaml`)
+- `SCRAPE_DIR` — skip scraping by pointing to existing data folder
+- Comment/uncomment stages to run selectively
+
+### Running Individual Stages
+
+#### Stage 1: Scrape Posts
+```bash
+python test_scripts/run_scraper_posts.py
+```
+
+#### Stage 2: Analyse Post Titles
+```bash
+python test_scripts/run_analyze_posts.py
+```
+
+#### Stage 3: Preprocess Posts
+```bash
+python test_scripts/run_preprocess_posts.py
+```
+
+#### Stage 4: Scrape Comments
+```bash
+python test_scripts/run_scrape_comments.py
+```
+
+#### Stage 5: Preprocess Comments
+```bash
+python test_scripts/run_preprocess_comments.py
+```
+
+#### Stage 6: Analyse Comments
+```bash
+python test_scripts/run_analyze_comments.py
+```
+
+#### Stage 7: Compute Metrics
+```bash
+python test_scripts/run_v3_metrics.py
+```
+
+#### Stage 8: Generate Plots
+```bash
+python test_scripts/ad-hoc/plot_v3_metrics.py
+```
+
+### Configuration
+
+All pipeline parameters are in YAML config files under `config/`:
+
+```yaml
+scraping:
+  subreddits: ["politics", "atheism", "philosophy"]  # Which communities to scrape
+  num_posts: 100                                       # Posts per subreddit
+  sort_method: "top"                                  # Sorting: top, new, hot
+  time_filter: "all"                                  # Time range: all, year, month, week, day
+
+post_analysis:
+  provider: "anthropic"                              # LLM: anthropic or openai
+  model: "claude-3-haiku-20240307"                   # Model name
+  temperature: 0.1                                   # Creativity: 0=deterministic, 1=random
+  max_tokens: 500                                    # Output token limit
+
+preprocessing:
+  min_comments: 10                                   # Posts must have ≥10 comments
+  top_n_per_subreddit: 30                            # Select top-30 posts per community
+  min_discussion_score: 0.6                          # Discussion quality threshold
+  min_topic_peers: 1                                 # Minimum peer comments for topic validation
+
+comment_scraping:
+  max_comments_per_post: 500                         # Max comments to fetch per post
+```
+
+### Example: Custom Analysis
 
 ```python
-from datetime import datetime, timedelta
 from chambercheck import Config
-from chambercheck.scrapers import RedditScraper
+from chambercheck.CC_derived_metrics import V3Metrics
+import json
 
-# Initialize configuration
-config = Config()
+# Load configuration
+config = Config(config_path="config/config.test.yaml")
 
-# Create Reddit scraper
-scraper = RedditScraper(config.get_scraper_config('reddit'))
-scraper.authenticate()
-
-# Fetch posts from last 30 days
-end_date = datetime.now()
-start_date = end_date - timedelta(days=30)
-
-posts = scraper.fetch_posts_by_engagement(
-    community='politics',
-    start_date=start_date,
-    end_date=end_date,
-    sort_by='top',
-    limit=100
+# Load computed metrics
+metrics = V3Metrics.from_files(
+    metric_file="data/output/scrape_001/v3_metrics_001.json"
 )
 
-print(f"Fetched {len(posts)} posts")
+# Inspect echo chamber score per subreddit
+for subreddit, scores in metrics.by_subreddit.items():
+    print(f"{subreddit}: Echo Argument Score = {scores['echo_argument_score']:.3f}")
 ```
 
-### Analyzing Echo Chamber Metrics
-
-```python
-# Coming soon: Full analysis pipeline
-from chambercheck.analysis import TopicAnalyzer, ArgumentAnalyzer
-from chambercheck.scoring import EchoChamberScore
-
-# Analyze topics
-topic_analyzer = TopicAnalyzer()
-topics = topic_analyzer.analyze(posts)
-
-# Score echo chamber dynamics
-scorer = EchoChamberScore()
-result = scorer.compute(posts, comments, topics)
-
-print(result.get_summary())
-```
+For detailed methodology and metric definitions, see [PIPELINE_WORKFLOW.md](data/output/PIPELINE_WORKFLOW.md).
 
 ### A/B/n Testing Different LLM Models
 
@@ -284,33 +395,84 @@ Weighted composite of low pluralism, high suppression, high hostility, and low e
 
 ChamberCheck evaluates discourse across different subject domains, recognizing that communities may be open on some topics while defensive on others (e.g., sports vs. politics).
 
-## Development
+## Testing & Development
 
 ### Running Tests
 
 ```bash
-pytest tests/
+# Run all tests with coverage
+pytest tests/ -v
+
+# Run specific test file
+pytest tests/test_workflow.py -v
+
+# Run with coverage report
+pytest --cov=ChamberCheck tests/
 ```
 
-### Code Formatting
+### Pipeline Validation
+
+The `tests/test_workflow.py` module validates that all 8 pipeline stages are correctly wired:
 
 ```bash
-black src/
-flake8 src/
+pytest tests/test_workflow.py::TestStage1Imports -v
+pytest tests/test_workflow.py::TestWorkflowOrdering -v
+```
+
+### Code Quality
+
+```bash
+# Format code
+black src/ tests/
+
+# Lint
+flake8 src/ tests/
+
+# Type checking
 mypy src/
 ```
+
+### Installing in Development Mode
+
+```bash
+# Install package + dev tools
+pip install -e ".[dev]"
+
+# Reinstall after changes to setup metadata
+pip install --force-reinstall -e .
+```
+
+### Making the Package Importable
+
+Once installed, you can use ChamberCheck like any Python package:
+
+```python
+# Both import styles work:
+from chambercheck import Config
+from ChamberCheck.scrapers import batch_scrape_posts_only
+```
+
+## Documentation
+
+For deeper technical documentation:
+
+- [ARCHITECTURE_RULES.md](ARCHITECTURE_RULES.md) — Coding standards and project conventions
+- [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) — Detailed module documentation
+- [PIPELINE_WORKFLOW.md](data/output/PIPELINE_WORKFLOW.md) — Full 8-stage pipeline explanation
+- [PLOTS_DOCUMENTATION.md](data/output/scrape_007/PLOTS_DOCUMENTATION.md) — Visualization methodology
 
 ## Roadmap
 
 - [x] Core project structure
-- [x] Reddit scraper implementation
-- [ ] Preprocessing pipeline
-- [ ] Topic modeling with LLMs
-- [ ] Base metric implementations
-- [ ] Composite scoring system
+- [x] Reddit scraper implementation  
+- [x] Full 8-stage pipeline
+- [x] LLM-powered comment analysis
+- [x] Echo chamber metrics (V3)
+- [x] Comprehensive test suite
 - [ ] Facebook scraper
-- [ ] Web dashboard for visualization
-- [ ] API endpoint for external integration
+- [ ] Web API for integration
+- [ ] Interactive dashboard
+- [ ] Real-time monitoring
 
 ## Research & Citations
 
@@ -328,14 +490,33 @@ This tool is based on academic research in social epistemology, political psycho
 - **Interpretation**: Scores reflect observable discourse, not internal beliefs
 - **Comparison**: Results should be interpreted comparatively, not as absolute judgments
 
+## Getting Help
+
+**API Issues?**
+- Check your API key is set correctly (env var or `.env` file)
+- Verify you have sufficient credits/quota with the LLM provider
+- See `ARCHITECTURE_RULES.md` for credential management best practices
+
+**Pipeline Problems?**
+- Check pipeline stage outputs are in the expected locations
+- Verify configuration in `config/*.yaml` matches your environment
+- See `PIPELINE_WORKFLOW.md` for detailed stage-by-stage troubleshooting
+
+**Questions?**
+- Open an issue on GitHub
+- Check existing issues and discussions
+
 ## Contributing
 
 Contributions are welcome! Please:
 
 1. Fork the repository
 2. Create a feature branch
-3. Make your changes with tests
-4. Submit a pull request
+3. Make your changes with tests (run `pytest` before submitting)
+4. Follow code style: `black src/` (line length 100)
+5. Submit a pull request
+
+See [ARCHITECTURE_RULES.md](ARCHITECTURE_RULES.md) for detailed guidelines.
 
 ## License
 
@@ -347,4 +528,6 @@ For questions or collaboration inquiries, please open an issue on GitHub.
 
 ---
 
-**Note**: This project is under active development. APIs may change.
+**Note**: This project is research-grade software under active development. API signatures and data formats may change between releases. See [CHANGELOG.md](CHANGELOG.md) (if present) for version history.
+
+**License**: MIT — See [LICENSE](LICENSE) file for details.
