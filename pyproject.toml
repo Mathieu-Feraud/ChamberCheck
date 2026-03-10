@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "chambercheck"
-version = "0.0.1"
-description = "An LLM-powered tool for analyzing echo chamber dynamics in online communities, this version is a proof of concept"
+version = "0.1.0"
+description = "LLM-powered research tool for quantifying echo chamber dynamics in online communities through discourse analysis"
 readme = "README.md"
 requires-python = ">=3.9"
 license = {text = "MIT"}
@@ -16,12 +16,19 @@ keywords = ["echo-chamber", "social-media", "discourse-analysis", "reddit", "nlp
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Sociology",
+    "Topic :: Text Processing :: Linguistic",
     "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Natural Language :: English",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 
 dependencies = [
@@ -29,6 +36,7 @@ dependencies = [
     "praw>=7.7.0",  # Reddit API wrapper
     "pandas>=2.0.0",  # Data manipulation
     "numpy>=1.24.0",  # Numerical operations
+    "scipy>=1.10.0",  # Statistical functions (Spearman correlation)
     "beautifulsoup4>=4.12.0",  # HTML parsing
     "requests>=2.31.0",  # HTTP requests
     
@@ -56,7 +64,6 @@ dependencies = [
     # Utilities
     "python-dotenv>=1.0.0",  # Environment variable management
     "tqdm>=4.65.0",  # Progress bars
-    "requests>=2.31.0",  # HTTP requests
 ]
 
 [project.optional-dependencies]
@@ -69,9 +76,10 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/yourusername/ChamberCheck"
-Repository = "https://github.com/yourusername/ChamberCheck"
-Documentation = "https://github.com/yourusername/ChamberCheck/blob/main/README.md"
+Homepage = "https://github.com/Mathieu-Feraud/ChamberCheck"
+Repository = "https://github.com/Mathieu-Feraud/ChamberCheck"
+Documentation = "https://github.com/Mathieu-Feraud/ChamberCheck/blob/main/README.md"
+Issues = "https://github.com/Mathieu-Feraud/ChamberCheck/issues"
 
 [project.scripts]
 chambercheck = "ChamberCheck.cli:main"
