@@ -84,8 +84,6 @@ pip install -e ".[dev]"
 
 4. **Configure API credentials:**
 
-**⚠️ IMPORTANT: Never commit API keys to git. Use environment variables or local config files.**
-
 #### Option A: Environment Variables (Recommended)
 
 Set environment variables before running ChamberCheck:
@@ -136,8 +134,6 @@ comment_analysis:
   provider: anthropic
   model: claude-haiku-4-5-20251001
 ```
-
-**Note:** Config files and environment variables are never committed. The `.env` file in the project root is ignored by git.
 
 ## Usage: The 8-Stage Pipeline
 
