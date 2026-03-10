@@ -4,57 +4,15 @@
 
 ChamberCheck quantifies discourse patterns in online communities (Reddit, Facebook, etc.) by measuring argument diversity, hostility, deviation suppression, and epistemic openness. The tool provides both individual metrics and a composite "Echo Chamber Score" to help researchers and community moderators understand discourse health.
 
-## Features
-
-- 🔍 **Multi-platform scraping** - Modular architecture supports Reddit, Facebook, and other platforms
-- 📊 **Comprehensive metrics** - Measures argument diversity, hostility, suppression, and epistemic closure
-- 🧠 **LLM-powered analysis** - Uses large language models for nuanced discourse understanding
-- 📈 **Topic-conditional scoring** - Evaluates echo chamber behavior across different subject domains
-- 🎯 **Research-grade methodology** - Based on social epistemology and political psychology literature
-
-## Project Structure
-
-```
-ChamberCheck/
-├── src/
-│   └── ChamberCheck/
-│       ├── scrapers/                # Platform-specific data collection
-│       ├── analysis/                # LLM-powered discourse analysis
-│       ├── preprocessing/           # Data cleaning and filtering
-│       ├── CC_derived_metrics/      # Echo chamber metrics computation
-│       ├── model_analysis/          # A/B/n testing framework
-│       ├── reporting/               # Report generation
-│       ├── models/                  # Data models (Post, Comment, etc.)
-│       ├── scoring/                 # Metric aggregation
-│       ├── utils/                   # Utilities and logging
-│       ├── config.py                # Configuration management
-│       └── constants.py             # Project-wide constants
-├── config/                          # YAML configuration files
-│   ├── config.yaml                  # Production config
-│   ├── config.test.yaml             # Test/dev config
-│   └── config.intellectual.yaml     # Custom config template
-├── data/
-│   ├── raw/                         # Raw scraped data
-│   ├── processed/                   # Cleaned data
-│   └── output/                      # Analysis results and plots
-├── test_scripts/                    # Pipeline execution scripts
-│   ├── workflow.py                  # Full 8-stage pipeline runner
-│   ├── run_*.py                     # Individual stage executors
-│   └── ad-hoc/                      # Exploratory and diagnostic scripts
-├── tests/                           # Unit and integration tests
-├── pyproject.toml                   # Package metadata and dependencies
-├── ARCHITECTURE_RULES.md            # Coding guidelines
-└── README.md                        # This file
-```
-
 ## Installation
 
 ### Prerequisites
 
 - Python 3.9 or higher
 - Reddit API credentials (for Reddit scraping)
+- LLM API key (OpenAI and/or Anthropic)
 
-### Setup
+### User Guide
 
 1. Clone the repository:
 ```bash
@@ -387,67 +345,6 @@ ChamberCheck decomposes echo chambers into measurable dimensions:
 ### Echo Chamber Score
 Weighted composite of low pluralism, high suppression, high hostility, and low epistemic openness.
 
-## Topic-Conditional Analysis
-
-ChamberCheck evaluates discourse across different subject domains, recognizing that communities may be open on some topics while defensive on others (e.g., sports vs. politics).
-
-## Testing & Development
-
-### Running Tests
-
-```bash
-# Run all tests with coverage
-pytest tests/ -v
-
-# Run specific test file
-pytest tests/test_workflow.py -v
-
-# Run with coverage report
-pytest --cov=ChamberCheck tests/
-```
-
-### Pipeline Validation
-
-The `tests/test_workflow.py` module validates that all 8 pipeline stages are correctly wired:
-
-```bash
-pytest tests/test_workflow.py::TestStage1Imports -v
-pytest tests/test_workflow.py::TestWorkflowOrdering -v
-```
-
-### Code Quality
-
-```bash
-# Format code
-black src/ tests/
-
-# Lint
-flake8 src/ tests/
-
-# Type checking
-mypy src/
-```
-
-### Installing in Development Mode
-
-```bash
-# Install package + dev tools
-pip install -e ".[dev]"
-
-# Reinstall after changes to setup metadata
-pip install --force-reinstall -e .
-```
-
-### Making the Package Importable
-
-Once installed, you can use ChamberCheck like any Python package:
-
-```python
-# Both import styles work:
-from chambercheck import Config
-from ChamberCheck.scrapers import batch_scrape_posts_only
-```
-
 ## Documentation
 
 For deeper technical documentation:
@@ -473,21 +370,40 @@ This tool is based on academic research in social epistemology, political psycho
 - **Interpretation**: Scores reflect observable discourse, not internal beliefs
 - **Comparison**: Results should be interpreted comparatively, not as absolute judgments
 
-## Getting Help
+## Project Structure
 
-**API Issues?**
-- Check your API key is set correctly (env var or `.env` file)
-- Verify you have sufficient credits/quota with the LLM provider
-- See `ARCHITECTURE_RULES.md` for credential management best practices
-
-**Pipeline Problems?**
-- Check pipeline stage outputs are in the expected locations
-- Verify configuration in `config/*.yaml` matches your environment
-- See `PIPELINE_WORKFLOW.md` for detailed stage-by-stage troubleshooting
-
-**Questions?**
-- Open an issue on GitHub
-- Check existing issues and discussions
+```
+ChamberCheck/
+├── src/
+│   └── ChamberCheck/
+│       ├── scrapers/                # Platform-specific data collection
+│       ├── analysis/                # LLM-powered discourse analysis
+│       ├── preprocessing/           # Data cleaning and filtering
+│       ├── CC_derived_metrics/      # Echo chamber metrics computation
+│       ├── model_analysis/          # A/B/n testing framework
+│       ├── reporting/               # Report generation
+│       ├── models/                  # Data models (Post, Comment, etc.)
+│       ├── scoring/                 # Metric aggregation
+│       ├── utils/                   # Utilities and logging
+│       ├── config.py                # Configuration management
+│       └── constants.py             # Project-wide constants
+├── config/                          # YAML configuration files
+│   ├── config.yaml                  # Production config
+│   ├── config.test.yaml             # Test/dev config
+│   └── config.intellectual.yaml     # Custom config template
+├── data/
+│   ├── raw/                         # Raw scraped data
+│   ├── processed/                   # Cleaned data
+│   └── output/                      # Analysis results and plots
+├── test_scripts/                    # Pipeline execution scripts
+│   ├── workflow.py                  # Full 8-stage pipeline runner
+│   ├── run_*.py                     # Individual stage executors
+│   └── ad-hoc/                      # Exploratory and diagnostic scripts
+├── tests/                           # Unit and integration tests
+├── pyproject.toml                   # Package metadata and dependencies
+├── ARCHITECTURE_RULES.md            # Coding guidelines
+└── README.md                        # This file
+```
 
 ## Contributing
 
