@@ -1,0 +1,58 @@
+# ChamberCheck — Production Configuration
+# API keys and secrets go in .env, never here.
+
+scraping:
+  num_posts: 500
+  sort_method: top
+  time_filter: all          # Reddit API window: all, year, month, week, day, hour
+  start_date: null          # ISO date YYYY-MM-DD — filter posts by created_at (null = no lower bound)
+  end_date: null            # ISO date YYYY-MM-DD — filter posts by created_at (null = no upper bound)
+  rate_limit_delay: 2       # seconds between requests
+  min_comments: 200        # skip posts below this threshold during scraping (don't count toward num_posts)
+  retry_on_429: true
+  max_retries: 10
+  retry_wait_seconds: 60
+  subreddits:
+    - conservative
+    - lateStageCapitalism
+    - antiwork
+    - decodingthegurus
+    - trump
+    - Christianity
+    - atheism
+    - technology
+    - philosophy
+    - sociology
+
+post_analysis:
+  provider: anthropic
+  model: claude-3-haiku-20240307
+  temperature: 0.1
+  max_tokens: 500
+
+preprocessing:
+  top_n_per_subreddit: 30
+  min_discussion_score: 0.8  # posts below this score are excluded
+  min_topic_peers: 6         # topic group (leaf→mid fallback) must have >= this many posts
+  exclude_topics:
+    - UNCLEAR
+
+comment_scraping:
+  window_days: 3             # only keep comments posted within N days of the post
+
+comment_preprocessing:
+  max_sample_per_post: 100   # target comment count per post (whole trunk threads, never split)
+  min_content_length: 20     # prune comments shorter than this (and their entire reply subtree)
+
+comment_analysis:
+  provider: anthropic
+  model: claude-haiku-4-5-20251001
+  temperature: 0.1
+  max_tokens: 500
+  rate_limit_delay: 0.5      # seconds between successive LLM calls
+  max_retries: 3             # retries on transient API errors
+  retry_wait_seconds: 5
+  include_rationale: false   # omit stance/epistemic rationale strings (~25-30% output token saving)
+
+scoring:
+  # placeholder — parameters to be defined when scoring pipeline is implemented

@@ -29,6 +29,8 @@ class OpenAIProvider(LLMProvider):
         
         super().__init__(api_key)
         self.model = model or DEFAULT_OPENAI_MODEL
+        self.last_response_model = None
+        self.last_response_usage = None
         self.logger = setup_logger("OpenAIProvider")
         
         try:
@@ -47,11 +49,12 @@ class OpenAIProvider(LLMProvider):
         Returns:
             Dictionary with scores
         """
+        self.last_response_model = None
+        self.last_response_usage = None
         try:
             from ..constants import ANALYSIS_INSTRUCTIONS_PROMPT, LLM_TEMPERATURE, LLM_MAX_TOKENS
             
-            response = self.client.chat.completions.create(
-                model=self.model,
+            response = self._create_chat_completion(
                 messages=[
                     {
                         "role": "user",
@@ -69,8 +72,10 @@ class OpenAIProvider(LLMProvider):
                     }
                 ],
                 temperature=LLM_TEMPERATURE,
-                max_tokens=LLM_MAX_TOKENS
+                max_tokens=LLM_MAX_TOKENS,
             )
+
+            self._record_response_metadata(response)
             
             response_text = response.choices[0].message.content
             self.logger.debug(f"Raw API response: {response_text}")
@@ -91,3 +96,159 @@ class OpenAIProvider(LLMProvider):
         except Exception as e:
             self.logger.error(f"OpenAI API error: {type(e).__name__}: {e}")
             raise
+    
+    def analyze_with_text(self, prompt: str) -> str:
+        """
+        Analyze plain text with the OpenAI model.
+        
+        Args:
+            prompt: Text prompt to send to the model
+        
+        Returns:
+            String response from the model
+        """
+        self.last_response_model = None
+        self.last_response_usage = None
+        try:
+            from ..constants import LLM_TEMPERATURE, LLM_MAX_TOKENS
+            
+            response = self._create_chat_completion(
+                messages=[
+                    {
+                        "role": "user",
+                        "content": [{"type": "text", "text": prompt}]
+                    }
+                ],
+                temperature=LLM_TEMPERATURE,
+                max_tokens=LLM_MAX_TOKENS,
+            )
+
+            self._record_response_metadata(response)
+            
+            response_text = response.choices[0].message.content
+            self.logger.debug(f"Text API response: {response_text[:200]}...")
+            return response_text
+        except Exception as e:
+            self.logger.error(f"OpenAI Text API error: {type(e).__name__}: {e}")
+            raise
+
+    def analyze_with_vision(self, prompt: str, image_url: str) -> str:
+        """
+        Analyze an image using OpenAI's vision capabilities.
+        
+        Args:
+            prompt: Analysis prompt
+            image_url: URL of the image to analyze
+        
+        Returns:
+            String response from the model
+        """
+        self.last_response_model = None
+        self.last_response_usage = None
+        try:
+            from ..constants import LLM_TEMPERATURE, LLM_MAX_TOKENS
+            
+            response = self._create_chat_completion(
+                messages=[
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": prompt
+                            },
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": image_url
+                                }
+                            }
+                        ]
+                    }
+                ],
+                temperature=LLM_TEMPERATURE,
+                max_tokens=LLM_MAX_TOKENS,
+            )
+
+            self._record_response_metadata(response)
+            
+            response_text = response.choices[0].message.content
+            self.logger.debug(f"Vision API response: {response_text[:200]}...")
+            
+            return response_text
+            
+        except Exception as e:
+            self.logger.error(f"OpenAI Vision API error: {type(e).__name__}: {e}")
+            raise
+
+    def _create_chat_completion(self, messages: list, temperature: float, max_tokens: int):
+        request = {
+            "model": self.model,
+            "messages": messages,
+        }
+
+        model_lower = (self.model or "").lower()
+        is_reasoning_model = (
+            model_lower.startswith("gpt-5")
+            or model_lower.startswith("o1")
+            or model_lower.startswith("o3")
+        )
+
+        if is_reasoning_model:
+            request["max_completion_tokens"] = max(max_tokens, 1200)
+            request["reasoning_effort"] = "medium" if model_lower == "gpt-5.2" else "minimal"
+        else:
+            request["temperature"] = temperature
+            request["max_tokens"] = max_tokens
+
+        try:
+            return self.client.chat.completions.create(**request)
+        except Exception as e:
+            message = str(e)
+
+            if "reasoning_effort" in message and "unsupported" in message.lower():
+                fallback_request = dict(request)
+                fallback_request["reasoning_effort"] = "low"
+                try:
+                    return self.client.chat.completions.create(**fallback_request)
+                except Exception as second_error:
+                    second_message = str(second_error)
+                    if "reasoning_effort" in second_message and "unsupported" in second_message.lower():
+                        fallback_request["reasoning_effort"] = "none"
+                        return self.client.chat.completions.create(**fallback_request)
+                    raise
+
+            if "max_tokens" in message or "max_completion_tokens" in message:
+                request.pop("max_tokens", None)
+                request["max_completion_tokens"] = max_tokens
+                try:
+                    return self.client.chat.completions.create(**request)
+                except Exception as second_error:
+                    message = str(second_error)
+                    if "temperature" not in message:
+                        raise
+
+            if "temperature" in message and "unsupported" in message.lower():
+                request.pop("temperature", None)
+                return self.client.chat.completions.create(**request)
+
+            raise
+
+    def _record_response_metadata(self, response: Any) -> None:
+        self.last_response_model = getattr(response, "model", None) or self.model
+        usage = getattr(response, "usage", None)
+        if not usage:
+            self.last_response_usage = None
+            return
+
+        prompt_tokens = getattr(usage, "prompt_tokens", None)
+        completion_tokens = getattr(usage, "completion_tokens", None)
+        total_tokens = getattr(usage, "total_tokens", None)
+
+        self.last_response_usage = {
+            "prompt_tokens": prompt_tokens,
+            "completion_tokens": completion_tokens,
+            "total_tokens": total_tokens,
+        }
+
+

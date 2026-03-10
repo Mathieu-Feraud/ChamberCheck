@@ -224,6 +224,7 @@ class RedditJSONScraper(BaseScraper):
                         'is_self': post_data.get('is_self', False),
                         'flair': post_data.get('link_flair_text'),
                         'permalink': post_data['permalink'],
+                        'external_url': post_data.get('url', None),  # For link posts
                         'gilded': post_data.get('gilded', 0),
                         'stickied': post_data.get('stickied', False),
                         'engagement_score': post_data.get('score', 0) + post_data.get('num_comments', 0) * 2
@@ -366,65 +367,105 @@ class RedditJSONScraper(BaseScraper):
         return all_comments
     
     def _fetch_post_comments(self, post_id: str, limit: int = None) -> List[Comment]:
-        """Fetch comments for a single post."""
-        # We need to know the subreddit - extract from post or use a workaround
-        # For now, we'll try the direct comment URL
-        url = f"https://www.reddit.com/comments/{post_id}.json"
-        if limit:
-            url += f"?limit={limit}"
+        """Fetch comments for a single post with pagination support.
         
-        self.logger.info(f"Fetching comments for post {post_id}")
-        data = self._make_request(url)
+        Args:
+            post_id: Reddit post ID
+            limit: Max comments to fetch. If None, fetches all available comments.
         
-        if not data or len(data) < 2:
+        Returns:
+            List of Comment objects
+        """
+        # If limit is 0, return empty list (don't fetch any comments)
+        if limit == 0:
             return []
         
-        # Reddit returns [post_data, comments_data]
-        comments_data = data[1]
-        comments = []
+        all_comments = []
+        after = None
+        request_count = 0
         
-        def extract_comments(items, depth=0):
-            """Recursively extract comments from nested structure."""
-            for item in items:
-                if item.get('kind') != 't1':  # t1 = comment
-                    continue
+        while True:
+            request_count += 1
+            
+            # Build URL for this request
+            url = f"https://www.reddit.com/comments/{post_id}.json?limit=100"
+            if after:
+                url += f"&after={after}"
+            
+            self.logger.info(f"Fetching comments for post {post_id} (request {request_count}, collected: {len(all_comments)})")
+            data = self._make_request(url)
+            
+            if not data or len(data) < 2:
+                self.logger.warning(f"No data returned for post {post_id}")
+                break
+            
+            # Reddit returns [post_data, comments_data]
+            comments_data = data[1]
+            
+            def extract_comments(items, depth=0):
+                """Recursively extract comments from nested structure."""
+                for item in items:
+                    # Stop if we've reached the limit
+                    if limit is not None and len(all_comments) >= limit:
+                        return False  # Signal to stop
+                    
+                    if item.get('kind') != 't1':  # t1 = comment
+                        continue
+                    
+                    comment_data = item['data']
+                    
+                    # Skip deleted/removed
+                    if comment_data.get('body') in [None, '[deleted]', '[removed]']:
+                        continue
+                    
+                    comment = Comment(
+                        comment_id=comment_data['id'],
+                        post_id=post_id,
+                        platform='reddit',
+                        content=comment_data.get('body', ''),
+                        author=comment_data.get('author', '[deleted]'),
+                        created_at=datetime.fromtimestamp(comment_data['created_utc']),
+                        upvotes=comment_data.get('ups', 0),
+                        downvotes=comment_data.get('downs', 0),
+                        parent_id=comment_data.get('parent_id', '').replace('t3_', '').replace('t1_', ''),
+                        depth=depth,
+                        metadata={
+                            'score': comment_data.get('score', 0),
+                            'is_submitter': comment_data.get('is_submitter', False),
+                            'stickied': comment_data.get('stickied', False),
+                            'gilded': comment_data.get('gilded', 0)
+                        }
+                    )
+                    all_comments.append(comment)
+                    
+                    # Process replies
+                    if 'replies' in comment_data and comment_data['replies']:
+                        if isinstance(comment_data['replies'], dict):
+                            replies = comment_data['replies'].get('data', {}).get('children', [])
+                            if not extract_comments(replies, depth + 1):
+                                return False  # Stop if limit reached
                 
-                comment_data = item['data']
-                
-                # Skip deleted/removed
-                if comment_data.get('body') in [None, '[deleted]', '[removed]']:
-                    continue
-                
-                comment = Comment(
-                    comment_id=comment_data['id'],
-                    post_id=post_id,
-                    platform='reddit',
-                    content=comment_data.get('body', ''),
-                    author=comment_data.get('author', '[deleted]'),
-                    created_at=datetime.fromtimestamp(comment_data['created_utc']),
-                    upvotes=comment_data.get('ups', 0),
-                    downvotes=comment_data.get('downs', 0),
-                    parent_id=comment_data.get('parent_id', '').replace('t3_', '').replace('t1_', ''),
-                    depth=depth,
-                    metadata={
-                        'score': comment_data.get('score', 0),
-                        'is_submitter': comment_data.get('is_submitter', False),
-                        'stickied': comment_data.get('stickied', False),
-                        'gilded': comment_data.get('gilded', 0)
-                    }
-                )
-                comments.append(comment)
-                
-                # Process replies
-                if 'replies' in comment_data and comment_data['replies']:
-                    if isinstance(comment_data['replies'], dict):
-                        replies = comment_data['replies'].get('data', {}).get('children', [])
-                        extract_comments(replies, depth + 1)
+                return True  # Continue
+            
+            children = comments_data.get('data', {}).get('children', [])
+            if not extract_comments(children):
+                # Reached limit while processing
+                break
+            
+            # Check for pagination token
+            after = comments_data.get('data', {}).get('after')
+            
+            if not after:
+                # No more pages available
+                self.logger.info(f"Reached end of comments for post {post_id} (total: {len(all_comments)})")
+                break
+            
+            # Stop if we've reached the limit
+            if limit is not None and len(all_comments) >= limit:
+                self.logger.info(f"Reached comment limit for post {post_id} (total: {len(all_comments)})")
+                break
         
-        children = comments_data.get('data', {}).get('children', [])
-        extract_comments(children)
-        
-        return comments
+        return all_comments
     
     def fetch_post_metadata(self, post_id: str) -> dict:
         """
@@ -455,6 +496,50 @@ class RedditJSONScraper(BaseScraper):
             'subreddit': post_data.get('subreddit'),
             'url': post_data.get('url'),
             'permalink': post_data['permalink']
+        }
+
+    def fetch_subreddit_info(self, community: str) -> dict:
+        """
+        Fetch basic metadata about a subreddit.
+
+        Args:
+            community: Subreddit name (without 'r/')
+
+        Returns:
+            Dictionary with subreddit metadata, or error info if unavailable
+        """
+        url = f"https://www.reddit.com/r/{community}/about.json"
+        data = self._make_request(url)
+
+        if not data or 'data' not in data:
+            return {
+                "subreddit": community,
+                "error": "No data returned",
+                "source_url": url
+            }
+
+        info = data.get('data', {})
+        created_utc = info.get('created_utc')
+        created_at = None
+        if isinstance(created_utc, (int, float)):
+            created_at = datetime.fromtimestamp(created_utc).isoformat()
+
+        return {
+            "subreddit": info.get('display_name', community),
+            "title": info.get('title'),
+            "public_description": info.get('public_description'),
+            "description": info.get('description'),
+            "subscribers": info.get('subscribers'),
+            "active_user_count": info.get('active_user_count'),
+            "created_utc": created_utc,
+            "created_at": created_at,
+            "over18": info.get('over18'),
+            "lang": info.get('lang'),
+            "subreddit_type": info.get('subreddit_type'),
+            "url": info.get('url'),
+            "community_icon": info.get('community_icon') or info.get('icon_img'),
+            "banner_img": info.get('banner_img'),
+            "source_url": url
         }
     
     def get_required_config_fields(self) -> List[str]:

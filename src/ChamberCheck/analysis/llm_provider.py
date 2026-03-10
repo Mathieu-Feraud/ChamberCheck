@@ -10,6 +10,10 @@ from typing import Dict, Any
 from ..constants import DEFAULT_OPENAI_MODEL, DEFAULT_ANTHROPIC_MODEL
 
 
+class NonRetryableError(Exception):
+    """Raised for errors that must not be retried (e.g. billing, auth failures)."""
+
+
 class LLMProvider(ABC):
     """Abstract base class for LLM providers."""
     
@@ -36,7 +40,13 @@ class LLMProvider(ABC):
         pass
     
     @classmethod
-    def from_config(cls, provider: str, api_key: str = None, model: str = None) -> 'LLMProvider':
+    def from_config(
+        cls,
+        provider: str,
+        api_key: str = None,
+        model: str = None,
+        include_rationale: bool = True,
+    ) -> 'LLMProvider':
         """
         Factory method to create provider from config.
         
@@ -44,6 +54,8 @@ class LLMProvider(ABC):
             provider: 'openai' or 'anthropic'
             api_key: API key (if not provided, loaded from env)
             model: Model name (uses default if not provided)
+            include_rationale: When False the provider uses the no-rationale
+                prompt variant, reducing output tokens by ~25-30 %.
         
         Returns:
             LLMProvider instance
@@ -53,6 +65,6 @@ class LLMProvider(ABC):
             return OpenAIProvider(api_key, model=model)
         elif provider.lower() == 'anthropic':
             from .anthropic_provider import AnthropicProvider
-            return AnthropicProvider(api_key, model=model)
+            return AnthropicProvider(api_key, model=model, include_rationale=include_rationale)
         else:
             raise ValueError(f"Unknown provider: {provider}")

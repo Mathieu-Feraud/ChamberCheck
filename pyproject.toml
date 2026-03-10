@@ -29,6 +29,8 @@ dependencies = [
     "praw>=7.7.0",  # Reddit API wrapper
     "pandas>=2.0.0",  # Data manipulation
     "numpy>=1.24.0",  # Numerical operations
+    "beautifulsoup4>=4.12.0",  # HTML parsing
+    "requests>=2.31.0",  # HTTP requests
     
     # NLP and ML
     "transformers>=4.30.0",  # Hugging Face transformers for embeddings
@@ -44,6 +46,7 @@ dependencies = [
     # Data storage and formats
     "jsonlines>=4.0.0",  # JSONL format support
     "pyarrow>=12.0.0",  # Parquet support for pandas
+    "pyyaml>=6.0.0",  # YAML config file support
     
     # Visualization
     "matplotlib>=3.7.0",  # Plotting

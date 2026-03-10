@@ -9,6 +9,14 @@ import json
 from typing import Dict, Any, Optional
 from pathlib import Path
 
+try:
+    import yaml as _yaml
+    _YAML_AVAILABLE = True
+except ImportError:
+    _YAML_AVAILABLE = False
+from dotenv import load_dotenv
+from .constants import DEFAULT_LLM_PROVIDER, DEFAULT_OPENAI_MODEL
+
 
 class Config:
     """
@@ -26,6 +34,9 @@ class Config:
         """
         self.config_data = {}
         
+        # Load .env file if it exists
+        load_dotenv()
+        
         if config_path:
             self.load_from_file(config_path)
         else:
@@ -33,13 +44,19 @@ class Config:
     
     def load_from_file(self, config_path: str):
         """
-        Load configuration from JSON file.
-        
+        Load configuration from a JSON or YAML file.
+
         Args:
-            config_path: Path to configuration JSON file
+            config_path: Path to configuration file (.json, .yaml, or .yml)
         """
-        with open(config_path, 'r') as f:
-            self.config_data = json.load(f)
+        path = Path(config_path)
+        with open(path, 'r', encoding='utf-8') as f:
+            if path.suffix in ('.yaml', '.yml'):
+                if not _YAML_AVAILABLE:
+                    raise ImportError("pyyaml is required for YAML config files: pip install pyyaml")
+                self.config_data = _yaml.safe_load(f)
+            else:
+                self.config_data = json.load(f)
     
     def load_from_env(self):
         """Load configuration from environment variables."""
@@ -55,9 +72,9 @@ class Config:
                 'app_secret': os.getenv('FB_APP_SECRET', '')
             },
             'llm': {
-                'provider': os.getenv('LLM_PROVIDER', 'openai'),
+                'provider': os.getenv('LLM_PROVIDER', DEFAULT_LLM_PROVIDER),
                 'api_key': os.getenv('LLM_API_KEY', ''),
-                'model': os.getenv('LLM_MODEL', 'gpt-4')
+                'model': os.getenv('LLM_MODEL', DEFAULT_OPENAI_MODEL)
             },
             'data': {
                 'raw_data_dir': os.getenv('RAW_DATA_DIR', 'data/raw'),

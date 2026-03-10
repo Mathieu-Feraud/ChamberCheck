@@ -64,10 +64,14 @@ data/output/*
 *.jsonl
 *.parquet
 
+# Reports
+reports/*
+
 # Keep directory structure
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 !data/output/.gitkeep
+!reports/.gitkeep
 
 # Logs
 *.log
