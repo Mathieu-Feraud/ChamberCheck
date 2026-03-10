@@ -457,19 +457,6 @@ For deeper technical documentation:
 - [PIPELINE_WORKFLOW.md](data/output/PIPELINE_WORKFLOW.md) — Full 8-stage pipeline explanation
 - [PLOTS_DOCUMENTATION.md](data/output/scrape_007/PLOTS_DOCUMENTATION.md) — Visualization methodology
 
-## Roadmap
-
-- [x] Core project structure
-- [x] Reddit scraper implementation  
-- [x] Full 8-stage pipeline
-- [x] LLM-powered comment analysis
-- [x] Echo chamber metrics (V3)
-- [x] Comprehensive test suite
-- [ ] Facebook scraper
-- [ ] Web API for integration
-- [ ] Interactive dashboard
-- [ ] Real-time monitoring
-
 ## Research & Citations
 
 This tool is based on academic research in social epistemology, political psychology, and computational social science. Key concepts include:
