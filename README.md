@@ -78,9 +78,8 @@ For deeper technical documentation:
 
 - [ARCHITECTURE_RULES.md](ARCHITECTURE_RULES.md) — Coding standards and project conventions
 - [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) — Detailed module documentation
-- [PIPELINE_WORKFLOW.md](data/output/PIPELINE_WORKFLOW.md) — Full 8-stage pipeline explanation
-- [PLOTS_DOCUMENTATION.md](data/output/scrape_007/PLOTS_DOCUMENTATION.md) — Visualization methodology
-- [ChamberCheck_Paper_v4.pdf](ChamberCheck_Paper_v4.pdf) — Supplementary material and research methodology
+- [PYPI_PUBLISH.md](PYPI_PUBLISH.md) — Package release and publishing workflow
+- [ChamberCheck_Paper_v4.pdf](ChamberCheck_Paper_v4.pdf) — Paper draft containing the full supplementary material
 
 ## Data Access
 
@@ -212,7 +211,7 @@ for subreddit, scores in metrics.by_subreddit.items():
     print(f"{subreddit}: Echo Argument Score = {scores['echo_argument_score']:.3f}")
 ```
 
-For detailed methodology and metric definitions, see [PIPELINE_WORKFLOW.md](data/output/PIPELINE_WORKFLOW.md).
+For detailed methodology and metric definitions, see [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) and [ChamberCheck_Paper_v4.pdf](ChamberCheck_Paper_v4.pdf).
 
 ### A/B/n Testing Different LLM Models
 
@@ -419,6 +418,6 @@ For questions or collaboration inquiries, please open an issue on GitHub.
 
 ---
 
-**Note**: This project is research-grade software under active development. API signatures and data formats may change between releases. See [CHANGELOG.md](CHANGELOG.md) (if present) for version history.
+**Note**: This project is research-grade software under active development. API signatures and data formats may change between releases.
 
 **License**: MIT — See [LICENSE](LICENSE) file for details.
