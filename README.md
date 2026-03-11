@@ -353,6 +353,18 @@ For deeper technical documentation:
 - [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) — Detailed module documentation
 - [PIPELINE_WORKFLOW.md](data/output/PIPELINE_WORKFLOW.md) — Full 8-stage pipeline explanation
 - [PLOTS_DOCUMENTATION.md](data/output/scrape_007/PLOTS_DOCUMENTATION.md) — Visualization methodology
+- [ChamberCheck_Paper_v4.pdf](ChamberCheck_Paper_v4.pdf) — Supplementary material and research methodology
+
+## Data Access
+
+Processed datasets from published analyses are available for download:
+
+- [Processed Data (OneDrive)](https://1drv.ms/f/c/d5c2c787ee7f6d0f/IgDoJzL5o2AnRIRQsc02Q3UCAdBoIiIG4eM62kPH4NgA1w0?e=urhaDL) — Pre-analyzed Reddit data, metrics, and visualizations
+
+These datasets are optional and not required to use ChamberCheck, but they are useful for:  
+- Reproducing published findings
+- Understanding output formats from the 8-stage pipeline
+- Learning by example before running your own analyses
 
 ## Research & Citations
 
