@@ -78,7 +78,6 @@ For deeper technical documentation:
 
 - [ARCHITECTURE_RULES.md](ARCHITECTURE_RULES.md) — Coding standards and project conventions
 - [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) — Detailed module documentation
-- [PYPI_PUBLISH.md](PYPI_PUBLISH.md) — Package release and publishing workflow
 - [ChamberCheck_Paper_v4.pdf](ChamberCheck_Paper_v4.pdf) — Paper draft containing the full supplementary material
 
 ## Data Access
