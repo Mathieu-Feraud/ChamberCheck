@@ -14,33 +14,12 @@ ChamberCheck quantifies discourse patterns in online communities (Reddit, Facebo
 
 ### User Guide
 
-1. Clone the repository:
+1. Install the package:
 ```bash
-git clone https://github.com/yourusername/ChamberCheck.git
-cd ChamberCheck
+pip install chambercheck
 ```
 
-2. Create a virtual environment:
-```powershell
-# On Windows (PowerShell)
-python -m venv venv
-.\venv\Scripts\Activate.ps1
-
-# On Linux/Mac
-python -m venv venv
-source venv/bin/activate
-```
-
-3. Install the package with dependencies:
-```bash
-# Install in editable mode with all dependencies
-pip install -e .
-
-# Or install with development tools
-pip install -e ".[dev]"
-```
-
-4. **Configure API credentials:**
+2. **Configure API credentials:**
 
 #### Option A: Environment Variables (Recommended)
 
@@ -92,6 +71,27 @@ comment_analysis:
   provider: anthropic
   model: claude-haiku-4-5-20251001
 ```
+
+## Documentation
+
+For deeper technical documentation:
+
+- [ARCHITECTURE_RULES.md](ARCHITECTURE_RULES.md) — Coding standards and project conventions
+- [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) — Detailed module documentation
+- [PIPELINE_WORKFLOW.md](data/output/PIPELINE_WORKFLOW.md) — Full 8-stage pipeline explanation
+- [PLOTS_DOCUMENTATION.md](data/output/scrape_007/PLOTS_DOCUMENTATION.md) — Visualization methodology
+- [ChamberCheck_Paper_v4.pdf](ChamberCheck_Paper_v4.pdf) — Supplementary material and research methodology
+
+## Data Access
+
+Processed datasets from published analyses are available for download:
+
+- [Processed Data (OneDrive)](https://1drv.ms/f/c/d5c2c787ee7f6d0f/IgDoJzL5o2AnRIRQsc02Q3UCAdBoIiIG4eM62kPH4NgA1w0?e=urhaDL) — Pre-analyzed Reddit data, metrics, and visualizations
+
+These datasets are optional and not required to use ChamberCheck, but they are useful for:  
+- Reproducing published findings
+- Understanding output formats from the 8-stage pipeline
+- Learning by example before running your own analyses
 
 ## Usage: The 8-Stage Pipeline
 
@@ -345,27 +345,6 @@ ChamberCheck decomposes echo chambers into measurable dimensions:
 ### Echo Chamber Score
 Weighted composite of low pluralism, high suppression, high hostility, and low epistemic openness.
 
-## Documentation
-
-For deeper technical documentation:
-
-- [ARCHITECTURE_RULES.md](ARCHITECTURE_RULES.md) — Coding standards and project conventions
-- [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) — Detailed module documentation
-- [PIPELINE_WORKFLOW.md](data/output/PIPELINE_WORKFLOW.md) — Full 8-stage pipeline explanation
-- [PLOTS_DOCUMENTATION.md](data/output/scrape_007/PLOTS_DOCUMENTATION.md) — Visualization methodology
-- [ChamberCheck_Paper_v4.pdf](ChamberCheck_Paper_v4.pdf) — Supplementary material and research methodology
-
-## Data Access
-
-Processed datasets from published analyses are available for download:
-
-- [Processed Data (OneDrive)](https://1drv.ms/f/c/d5c2c787ee7f6d0f/IgDoJzL5o2AnRIRQsc02Q3UCAdBoIiIG4eM62kPH4NgA1w0?e=urhaDL) — Pre-analyzed Reddit data, metrics, and visualizations
-
-These datasets are optional and not required to use ChamberCheck, but they are useful for:  
-- Reproducing published findings
-- Understanding output formats from the 8-stage pipeline
-- Learning by example before running your own analyses
-
 ## Research & Citations
 
 This tool is based on academic research in social epistemology, political psychology, and computational social science. Key concepts include:
@@ -381,6 +360,7 @@ This tool is based on academic research in social epistemology, political psycho
 - **Bias**: LLM-based metrics require validation against human annotations
 - **Interpretation**: Scores reflect observable discourse, not internal beliefs
 - **Comparison**: Results should be interpreted comparatively, not as absolute judgments
+
 
 ## Project Structure
 
